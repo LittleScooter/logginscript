@@ -1,16 +1,19 @@
 const express = require("express");
 
 const app = express();
+app.use(express.urlencoded({extended:false}));
 
 app.get("/",function(req,res){
     res.send("index route...");
 });
 
 app.get("/login",function(req,res){
-    res.send("route för att visa inloggningsformulär");
+    res.sendFile(__dirname+"/loginform.html");
 });
 
 app.post("/login",function(req,res){
+
+    res.send(req.body);
 
     /**
      * 1. hämta data som klienten skickat ( Repetition )
@@ -27,11 +30,8 @@ app.post("/login",function(req,res){
      * 9. Småfix för att förbättra säkerhet och fixa utloggning. 
      */
 
-    res.send(`Route för att hantera själva inloggningen.<br>
-    En del av detta kommer att ske i middleware`);
-
 });
 
 // kollar om systemet har en angiven port, annars 3700...
-const port = process.env.PORT || 3700
+const port = process.env.PORT || 3500
 app.listen(port, function(){console.log("port:" +port)});
