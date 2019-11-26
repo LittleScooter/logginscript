@@ -2,59 +2,84 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
-const secret =require("./secret");
+const secret = require("./secret");
 
 const app = express();
 
-app.use(express.urlencoded({extended:false}));
+app.use(express.urlencoded({
+    extended: false
+}));
 app.use(cookieParser());
 
-app.get("/",function(req,res){
-    res.send(request.cookies);
+app.get("/", function (req, res) {
+    res.send(req.cookies);
 });
 
-app.get("/login",function(req,res){
-    res.sendFile(__dirname+"/loginform.html");
+app.get("/secret", auth, function (req, res) {
+    res.send(req.cookies);
 });
 
-app.post("/login",function(req,res){
-    
+function auth(req, res, next) {
+    //börjar med att kolla om cookie ens existerar
+    if (req.cookies.token) {
+        jwt.verify(req.cookies.token, secret, function (err, token) {
+            if (!err) {
+                next();
+            } else {
+                res.send(err.message);
+            }
+        });
+    } else {
+        res.send("no token provided");
+    }
+};
+
+app.get("/login", function (req, res) {
+    res.sendFile(__dirname + "/loginform.html");
+});
+
+app.get("/logout", function(rqe,res){
+    res.cookie("token","snart är det jul");
+    res.redirect("/secret");
+})
+
+app.post("/login", function (req, res) {
+
     //Hämta våra användare från db/fil
     const users = require("./users");
 
-    const user = users.filter(function(u){
+    const user = users.filter(function (u) {
         console.log(u);
         console.log(req.body.email);
-        if(req.body.email === u.email)
-        {
+        if (req.body.email === u.email) {
             return true;
         }
     });
 
     //Om vi har en och exakt en användare med rätt email
-    if(user.length===1)
-    {
+    if (user.length === 1) {
         //kolla lösenord
-        bcrypt.compare(req.body.password,user[0].password,function(err,success){
+        bcrypt.compare(req.body.password, user[0].password, function (err, success) {
 
-            if(success)
-            {
+            if (success) {
                 //res.cookie("auth",{httpOnly:true,sameSite:"strict"});
-                const token = jwt.sign({email:user[0].email},secret,{expiresIn:"1m"});
-                res.cookie("token",token,{httpOnly:true,sameSite:"strict"});
+                const token = jwt.sign({
+                    email: user[0].email
+                }, secret, {
+                    expiresIn: "1m"
+                });
+                res.cookie("token", token, {
+                    httpOnly: true,
+                    sameSite: "strict"
+                });
                 res.send("login success !!! wow")
-            }
-            else
-            {
+            } else {
                 res.send("wrong password");
             }
         });
-    }
-    else
-    {
+    } else {
         res.send("no such user");
     }
-
 
     /**
      * 1. hämta data som klienten skickat ( Repetition )
@@ -75,4 +100,6 @@ app.post("/login",function(req,res){
 
 // kollar om systemet har en angiven port, annars 3700...
 const port = process.env.PORT || 3500
-app.listen(port, function(){console.log("port:" +port)});
+app.listen(port, function () {
+    console.log("port:" + port)
+});
