@@ -38,8 +38,8 @@ app.get("/login", function (req, res) {
     res.sendFile(__dirname + "/loginform.html");
 });
 
-app.get("/logout", function(rqe,res){
-    res.cookie("token","snart är det jul");
+app.get("/logout", function (rqe, res) {
+    res.cookie("token", "snart är det jul");
     res.redirect("/secret");
 })
 
