@@ -98,7 +98,7 @@ app.post("/login", function (req, res) {
 
 });
 
-// kollar om systemet har en angiven port, annars 3700...
+// kollar om systemet har en angiven port, annars 3500...
 const port = process.env.PORT || 3500
 app.listen(port, function () {
     console.log("port:" + port)
